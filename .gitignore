@@ -26,3 +26,6 @@ Makefile
 
 # backup files
 *~
+
+# testcase samples
+samples
