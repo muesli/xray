@@ -13,10 +13,10 @@ void
 createSnaps( const QString& file, const QString& tmpPath )
 {
     QStringList args;
-    args << "-sstep" << "10"                             // only output keyframes
+    args << "-sstep" << "10"                            // only output keyframes in 10 second increments
          << "-nosound" << "-vo" << "jpeg"               // output as jpegs
-         << "-ss" << "00:00:45"                         // start one minute into the video
-         << "-frames" << QString::number( KEYFRAMES )   // output 10 frames
+         << "-ss" << "00:00:45"                         // start 45 seconds into the video
+         << "-frames" << QString::number( KEYFRAMES )   // output x frames total
          << file;
 
     QProcess p;
@@ -41,7 +41,7 @@ hashSnaps( const QString& path )
             continue;
 
         ulong64 hash;
-        int err = ph_dct_imagehash(fileInfo.absoluteFilePath().toLocal8Bit(), hash);
+        int err = ph_dct_imagehash( fileInfo.absoluteFilePath().toLocal8Bit(), hash );
         if ( err )
             continue;
 
