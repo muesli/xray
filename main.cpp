@@ -4,8 +4,8 @@
 #include <pHash.h>
 
 static const QString TMPNAME = "xraytmp";   // name of temporary dir (usually below /tmp)
-static const int THRESHOLD = 3;             // find at least x dupe snapshots to consider video duped
-static const int KEYFRAMES = 5;             // how many snapshots (keyframes) to compare
+static const int THRESHOLD = 5;             // find at least x dupe snapshots to consider video duped
+static const int KEYFRAMES = 10;             // how many snapshots (keyframes) to compare
 
 
 // create snapshots from video file
@@ -13,9 +13,9 @@ void
 createSnaps( const QString& file, const QString& tmpPath )
 {
     QStringList args;
-    args << "-sstep" << "1"                             // only output keyframes
+    args << "-sstep" << "10"                             // only output keyframes
          << "-nosound" << "-vo" << "jpeg"               // output as jpegs
-         << "-ss" << "00:01:00"                         // start one minute into the video
+         << "-ss" << "00:00:45"                         // start one minute into the video
          << "-frames" << QString::number( KEYFRAMES )   // output 10 frames
          << file;
 
@@ -64,7 +64,7 @@ closestHashes( QHash<ulong64, QPair<int, QString> >& hashes, const ulong64& sear
     for ( int i = 0; i < hashes.keys().count(); i++ )
     {
         ulong64 key = hashes.keys().at( i );
-        if ( ph_hamming_distance( searchKey, key ) < 10 )
+        if ( ph_hamming_distance( searchKey, key ) < 4 )
         {
             QPair<int, QString> pair = hashes.values().at( i );
             res << pair;
