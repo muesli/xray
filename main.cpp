@@ -158,7 +158,7 @@ scanDir( QHash<ulong64, QPair<int, QString> >& hashes, const QString& path )
             if ( matches.values().at( y ) >= THRESHOLD )
             {
                 std::cout << "   --> Dupe of \"" << qPrintable( matches.keys().at( y ) ) << "\" - size: " << QFileInfo( matches.keys().at( y ) ).size()
-                          << " (scores " << qMin( 10, matches.values().at( y ) ) << " out of " << KEYFRAMES << ")" << std::endl;
+                          << " (scores " << qMin( KEYFRAMES, matches.values().at( y ) ) << " out of " << KEYFRAMES << ")" << std::endl;
             }
         }
     }
