@@ -1,13 +1,13 @@
 # Maintainer: Christian Muehlhaeuser <muesli@gmail.com>
 
 pkgname=xray-git
-pkgver=3.67ed665
+pkgver=4.9e8ddae
 pkgrel=1
 pkgdesc="xray compares media files by their perceptual hash and identifies dupes"
 arch=('i686' 'x86_64')
 url="https://github.com/muesli/xray"
 license=('MIT')
-depends=('qt5-base')
+depends=('qt5-base' 'phash' 'mplayer')
 makedepends=('git')
 conflicts=('xray')
 provides=('xray')
