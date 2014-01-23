@@ -5,7 +5,7 @@
 
 static const QString TMPNAME = "xraytmp";   // name of temporary dir (usually below /tmp)
 static const int THRESHOLD = 5;             // find at least x dupe snapshots to consider video duped
-static const int KEYFRAMES = 10;             // how many snapshots (keyframes) to compare
+static const int KEYFRAMES = 10;            // how many snapshots (keyframes) to compare
 
 
 // create snapshots from video file
