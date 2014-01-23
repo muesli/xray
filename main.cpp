@@ -3,9 +3,10 @@
 
 #include <pHash.h>
 
-static QString TMPPATH;       // name of temporary dir (usually below /tmp)
-static const int THRESHOLD = 4;     // find at least x dupe snapshots to consider video duped
-static const int KEYFRAMES = 10;    // how many snapshots (keyframes) to compare
+static QString TMPPATH;                 // name of temporary dir (usually below /tmp)
+static const double THRESHOLD = 0.6;    // find at least x% dupe frames to consider video duped
+static const int FRAMES = 10;        // how many frames to compare
+static const int HAMMINGDIST = 10;      // hamming distance threshold for frame comparison
 
 
 // create snapshots from video file
@@ -13,10 +14,10 @@ void
 createSnaps( const QString& file, const QString& tmpPath )
 {
     QStringList args;
-    args << "-sstep" << "10"                            // only output keyframes in 10 second increments
-         << "-nosound" << "-vo" << "jpeg"               // output as jpegs
-         << "-ss" << "00:00:45"                         // start 45 seconds into the video
-         << "-frames" << QString::number( KEYFRAMES )   // output x frames total
+    args << "-nosound" << "-vo" << "jpeg"               // output as jpegs
+         << "-ss" << "00:01:30"                         // start 45 seconds into the video
+         << "-frames" << QString::number( FRAMES )   // output x frames total
+         //<< "-sstep" << "30"                            // only output keyframes in 10 second increments
          << file;
 
     QProcess p;
@@ -64,7 +65,7 @@ closestHashes( QHash<ulong64, QPair<int, QString> >& hashes, const ulong64& sear
     for ( int i = 0; i < hashes.keys().count(); i++ )
     {
         ulong64 key = hashes.keys().at( i );
-        if ( ph_hamming_distance( searchKey, key ) < 4 )
+        if ( ph_hamming_distance( searchKey, key ) < HAMMINGDIST )
         {
             QPair<int, QString> pair = hashes.values().at( i );
             res << pair;
@@ -154,10 +155,10 @@ scanDir( QHash<ulong64, QPair<int, QString> >& hashes, const QString& path )
         for ( int y = 0; y < matches.keys().count(); y++ )
         {
             // threshold of matched snapshots to consider duped
-            if ( matches.values().at( y ) >= THRESHOLD )
+            if ( (double)matches.values().at( y ) / (double)hash.count() >= THRESHOLD )
             {
                 std::cout << "   --> Dupe of \"" << qPrintable( matches.keys().at( y ) ) << "\" - size: " << QFileInfo( matches.keys().at( y ) ).size()
-                          << " (scores " << qMin( KEYFRAMES, matches.values().at( y ) ) << " out of " << KEYFRAMES << ")" << std::endl;
+                          << " (scores " << qMin( FRAMES, matches.values().at( y ) ) << " out of " << qMin( FRAMES, hash.count() ) << ")" << std::endl;
             }
         }
     }
