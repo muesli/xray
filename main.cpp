@@ -3,9 +3,9 @@
 
 #include <pHash.h>
 
-static const QString TMPNAME = "xraytmp";   // name of temporary dir (usually below /tmp)
-static const int THRESHOLD = 5;             // find at least x dupe snapshots to consider video duped
-static const int KEYFRAMES = 10;            // how many snapshots (keyframes) to compare
+static QString TMPPATH;       // name of temporary dir (usually below /tmp)
+static const int THRESHOLD = 4;     // find at least x dupe snapshots to consider video duped
+static const int KEYFRAMES = 10;    // how many snapshots (keyframes) to compare
 
 
 // create snapshots from video file
@@ -22,7 +22,7 @@ createSnaps( const QString& file, const QString& tmpPath )
     QProcess p;
     p.setWorkingDirectory( tmpPath );
     p.start( "mplayer", args );
-    p.waitForFinished( 60000 );             // wait one minute at most
+    p.waitForFinished( 60000 );     // wait one minute at most
 }
 
 
@@ -110,10 +110,9 @@ scanDir( QHash<ulong64, QPair<int, QString> >& hashes, const QString& path )
         std::cout << "Indexing \"" << qPrintable( fileInfo.absoluteFilePath() ) << "\" - size: " << fileInfo.size() << std::endl;
 
         // create snapshots
-        const QString tmpPath = QDir::tempPath() + "/" + TMPNAME;
-        createSnaps( fileInfo.absoluteFilePath(), tmpPath );
+        createSnaps( fileInfo.absoluteFilePath(), TMPPATH );
         // analyze and hash snapshots
-        QHash<ulong64, int> hash = hashSnaps( tmpPath );
+        QHash<ulong64, int> hash = hashSnaps( TMPPATH );
 
         QPair<int, QString> pair;       // snapshot #, filename
         QHash<QString, int> matches;    // filename, matches
@@ -181,9 +180,9 @@ main(int argc, char *argv[])
 
     QHash<ulong64, QPair<int, QString> > hashes;    // perceptual hash, pair<snapshot #, filename>
 
-    QDir::temp().mkdir( TMPNAME );
+    QTemporaryDir tmpDir;
+    TMPPATH = tmpDir.path();
     scanDir( hashes, app.arguments().at( 1 ) );
-    QDir::temp().rmdir( TMPNAME );
 
     return 0;
 }
