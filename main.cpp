@@ -5,25 +5,49 @@
 
 static QString TMPPATH;                 // name of temporary dir (usually below /tmp)
 static const double THRESHOLD = 0.6;    // find at least x% dupe frames to consider video duped
-static const int FRAMES = 10;        // how many frames to compare
-static const int HAMMINGDIST = 10;      // hamming distance threshold for frame comparison
+static const int FRAMES = 5;            // how many frames to compare
+static const int HAMMINGDIST = 16;      // hamming distance threshold for frame comparison
+
+
+QString
+timeToString( int seconds )
+{
+    int mins = seconds / 60 % 60;
+    int secs = seconds % 60;
+
+    if ( seconds < 0 )
+    {
+        mins = secs = 0;
+    }
+
+    return QString( "%1:%2" )
+        .arg( mins < 10 ? "0" + QString::number( mins ) : QString::number( mins ) )
+        .arg( secs < 10 ? "0" + QString::number( secs ) : QString::number( secs ) );
+}
 
 
 // create snapshots from video file
 void
 createSnaps( const QString& file, const QString& tmpPath )
 {
-    QStringList args;
-    args << "-nosound" << "-vo" << "jpeg"               // output as jpegs
-         << "-ss" << "00:01:30"                         // start 45 seconds into the video
-         << "-frames" << QString::number( FRAMES )   // output x frames total
-         //<< "-sstep" << "30"                            // only output keyframes in 10 second increments
-         << file;
+    for ( int i = 0; i < FRAMES; i++ )
+    {
+        QStringList args;
+        args
+             << "-ss" << timeToString( i * 60 + 90 )
+             << "-i" << file
+             << "-y"
+             << "-f" << "image2"
+             << "-vcodec" << "mjpeg"
+             << "-vframes" << "1"
+             << "-vf" << "scale=128:-1"
+             << QString( "%1.jpg" ).arg( i );
 
-    QProcess p;
-    p.setWorkingDirectory( tmpPath );
-    p.start( "mplayer", args );
-    p.waitForFinished( 60000 );     // wait one minute at most
+        QProcess p;
+        p.setWorkingDirectory( tmpPath );
+        p.start( "ffmpeg", args );
+        p.waitForFinished( 60000 );     // wait one minute at most
+    }
 }
 
 
@@ -143,6 +167,8 @@ scanDir( QHash<ulong64, QPair<int, QString> >& hashes, const QString& path )
                         matches[pair.second] = 1;
                     else
                         matches[pair.second] = matches[pair.second] + 1;
+
+                    break;
                 }
             }
 
