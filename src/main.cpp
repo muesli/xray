@@ -116,6 +116,25 @@ sha1Sum( const QString& path )
 }
 
 
+bool
+hasValidExtension( const QFileInfo& file )
+{
+    static QStringList exts;
+    if ( !exts.count() )
+        exts << ".wmv" << ".avi" << ".mp4" << ".mkv" << ".flv" << ".mpg" << ".m4v" << ".mov" << ".divx" << ".mpeg";
+
+    foreach ( const QString& ext, exts )
+    {
+        if ( file.fileName().endsWith( ext ) )
+        {
+            return true;
+        }
+    }
+
+    return false;
+}
+
+
 void
 scanDir( QHash<ulong64, QPair<int, QString> >& hashes, const QString& path )
 {
@@ -137,12 +156,7 @@ scanDir( QHash<ulong64, QPair<int, QString> >& hashes, const QString& path )
             scanDir( hashes, fileInfo.absolutePath() + "/" + fileInfo.fileName() );
             continue;
         }
-
-        if ( !fileInfo.fileName().endsWith(".wmv") && !fileInfo.fileName().endsWith(".avi") &&
-             !fileInfo.fileName().endsWith(".mp4") && !fileInfo.fileName().endsWith(".mkv") &&
-             !fileInfo.fileName().endsWith(".flv") && !fileInfo.fileName().endsWith(".mpg") &&
-             !fileInfo.fileName().endsWith(".m4v") && !fileInfo.fileName().endsWith(".mov") &&
-             !fileInfo.fileName().endsWith(".divx") && !fileInfo.fileName().endsWith(".mpeg") )
+        if ( !hasValidExtension( fileInfo ) )
         {
             // only index videos
             continue;
