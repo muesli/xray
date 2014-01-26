@@ -100,6 +100,22 @@ closestHashes( QHash<ulong64, QPair<int, QString> >& hashes, const ulong64& sear
 }
 
 
+QByteArray
+sha1Sum( const QString& path )
+{
+    QCryptographicHash hash( QCryptographicHash::Sha1 );
+    QFile file( path );
+
+    if ( file.open( QIODevice::ReadOnly ) )
+    {
+        hash.addData( file.readAll() );
+        return hash.result();
+    }
+
+    return QByteArray();
+}
+
+
 void
 scanDir( QHash<ulong64, QPair<int, QString> >& hashes, const QString& path )
 {
@@ -183,8 +199,19 @@ scanDir( QHash<ulong64, QPair<int, QString> >& hashes, const QString& path )
             // threshold of matched snapshots to consider duped
             if ( (double)matches.values().at( y ) / (double)hash.count() >= THRESHOLD )
             {
-                std::cout << "   --> Dupe of \"" << qPrintable( matches.keys().at( y ) ) << "\" - size: " << QFileInfo( matches.keys().at( y ) ).size()
-                          << " (scores " << qMin( FRAMES, matches.values().at( y ) ) << " out of " << qMin( FRAMES, hash.count() ) << ")" << std::endl;
+                QFileInfo dupeFile( matches.keys().at( y ) );
+                QByteArray sha1;
+                if ( matches.values().at( y ) == hash.count()
+                    && fileInfo.size() == dupeFile.size()
+                    && ( sha1 = sha1Sum( fileInfo.absoluteFilePath() ) ) == sha1Sum( dupeFile.absoluteFilePath() ) )
+                {
+                    std::cout << "   --> Exact copy of \"" << qPrintable( matches.keys().at( y ) ) << "\" - sha1: " << qPrintable( sha1.toHex() ) << std::endl;
+                }
+                else
+                {
+                    std::cout << "   --> Perceptual dupe of \"" << qPrintable( matches.keys().at( y ) ) << "\" - size: " << QFileInfo( matches.keys().at( y ) ).size()
+                              << " (scores " << qMin( FRAMES, matches.values().at( y ) ) << " out of " << qMin( FRAMES, hash.count() ) << ")" << std::endl;
+                }
             }
         }
     }
