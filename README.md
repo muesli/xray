@@ -36,6 +36,8 @@ So far this is just a working proof-of-concept. Plans to enhance & improve xray:
 - Combine individual frame hashes into one big file hash.
 - Compare video frames and when finding a reasonably close one, do a close inspection comparing more of the surrounding frames of both files.
 - Store hashes in a file (sqlite/unqlite/textfile) to speed up future comparisons.
+- Offer to automatically quarantine dupe files.
+- Provide an interactive mode.
 - Drop external snapshot process. Directly use libvlc or ffmpeg or such.
 
 Enjoy!
