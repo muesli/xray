@@ -141,6 +141,51 @@ closestHashes( QHash<ulong64, QPair<int, QString> >& hashes, const ulong64& sear
 }
 
 
+// find the files matching most of the p-hashes
+QHash<QString, int>
+fileMatches( const QString& file, const QHash<ulong64, int>& hash, QHash<ulong64, QPair<int, QString> >& hashes )
+{
+    QPair<int, QString> pair;       // snapshot #, filename
+    QHash<QString, int> matches;    // filename, matches
+
+    // go through all extracted snapshots and find dupes
+    for ( int j = 0; j < hash.keys().count(); j++ )
+    {
+        ulong64 key = hash.keys().at( j );  // hash
+        int value = hash.values().at( j );  // snapshot #
+
+        {
+            QList<QPair<int, QString> > res;    // snapshot #, filename
+
+            // find closest snapshots by hamming distance
+            res = closestHashes( hashes, key );
+            for ( int x = 0; x < res.count(); x++ )
+            {
+                pair = res.at( x );
+                if ( pair.second == file )
+                {
+                    // ignore matches to self
+                    continue;
+                }
+
+                // add/increment match count
+                if ( !matches.contains( pair.second ) )
+                    matches[pair.second] = 1;
+                else
+                    matches[pair.second] = matches[pair.second] + 1;
+            }
+        }
+
+        // store hashes for future comparisons
+        pair.first = value;
+        pair.second = file;
+        hashes.insertMulti( key, pair );
+    }
+
+    return matches;
+}
+
+
 QByteArray
 sha1Sum( const QString& path )
 {
@@ -207,47 +252,13 @@ scanDir( QHash<ulong64, QPair<int, QString> >& hashes, const QString& path )
 
         // create snapshots
         createSnaps( fileInfo.absoluteFilePath(), TMPPATH );
+
         // analyze and hash snapshots
         QHash<ulong64, int> hash = hashSnaps( TMPPATH );
 
-        QPair<int, QString> pair;       // snapshot #, filename
+        // find known files matching the extracted hashes
         QHash<QString, int> matches;    // filename, matches
-
-        // go through all extracted snapshots and find dupes
-        for ( int j = 0; j < hash.keys().count(); j++ )
-        {
-            ulong64 key = hash.keys().at( j );  // hash
-            int value = hash.values().at( j );  // snapshot #
-
-            {
-                QList<QPair<int, QString> > res;    // snapshot #, filename
-
-                // find closest snapshots by hamming distance
-                res = closestHashes( hashes, key );
-                for ( int x = 0; x < res.count(); x++ )
-                {
-                    pair = res.at( x );
-                    if ( pair.second == fileInfo.absoluteFilePath() )
-                    {
-                        // ignore matches to self
-                        continue;
-                    }
-
-                    // add/increment match count
-                    if ( !matches.contains( pair.second ) )
-                        matches[pair.second] = 1;
-                    else
-                        matches[pair.second] = matches[pair.second] + 1;
-
-                    break;
-                }
-            }
-
-            // store hashes for future comparisons
-            pair.first = value;
-            pair.second = fileInfo.absoluteFilePath();
-            hashes.insertMulti( key, pair );
-        }
+        matches = fileMatches( fileInfo.absoluteFilePath(), hash, hashes );
 
         for ( int y = 0; y < matches.keys().count(); y++ )
         {
