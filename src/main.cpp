@@ -26,15 +26,56 @@ timeToString( int seconds )
 }
 
 
+QVariantMap
+videoMetaData( const QString& file )
+{
+    QStringList args;
+    args
+         << "-i" << file
+         << "-show_format";
+
+    QProcess p;
+    p.start( "ffprobe", args );
+    p.waitForFinished( 60000 );     // wait one minute at most
+
+    QString output = p.readAll();
+    QStringList lines = output.split( "\n" );
+    QVariantMap res;
+
+    foreach ( const QString& l, lines )
+    {
+        const QString value = l.split("=").last();
+
+        if ( l.startsWith( "duration" ) )
+        {
+            res[ "duration" ] = value.toDouble();
+        }
+        if ( l.startsWith( "bit_rate" ) )
+        {
+            res[ "bitrate" ] = value.toInt();
+        }
+    }
+
+    return res;
+}
+
+
 // create snapshots from video file
 void
 createSnaps( const QString& file, const QString& tmpPath )
 {
+    // get meta data
+    QVariantMap metadata = videoMetaData( file );
+    std::cout << "   --> Duration: " << metadata[ "duration" ].toInt() << " - bitrate: " << metadata[ "bitrate" ].toInt() << std::endl;
+
+    int start = metadata[ "duration" ].toInt() / 10;
+    int step = metadata[ "duration" ].toInt() / ( FRAMES * 1.5 );
+
     for ( int i = 0; i < FRAMES; i++ )
     {
         QStringList args;
         args
-             << "-ss" << timeToString( i * 60 + 90 )
+             << "-ss" << timeToString( i * step + start )
              << "-i" << file
              << "-y"
              << "-f" << "image2"
