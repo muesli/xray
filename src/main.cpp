@@ -207,7 +207,9 @@ hasValidExtension( const QFileInfo& file )
 {
     static QStringList exts;
     if ( !exts.count() )
-        exts << ".wmv" << ".avi" << ".mp4" << ".mkv" << ".flv" << ".mpg" << ".m4v" << ".mov" << ".divx" << ".mpeg";
+        exts << ".3gp" << ".aaf" << ".asf" << ".avi" << ".divx" << ".flv"
+             << ".m1v" << ".m2v" << ".m4v" << ".mkv" << ".mov" << ".mp4" << ".mpg" << ".mpeg"
+             << ".rm" << ".ts" << ".wmv";
 
     foreach ( const QString& ext, exts )
     {
