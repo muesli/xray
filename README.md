@@ -18,9 +18,9 @@ In case xray thinks it found a perfect match, it will also calculate the sha1sum
 of both videos to safely identify exact copies of a file.
 
 ## Dependencies
-xray depends on QtCore (tested with Qt5, but should work with Qt4), ffmpeg and
-phash. You should be able to find existing packages for your system. On Ubuntu
-install "libphash0-dev", on Arch install "phash" from AUR.
+xray depends on QtCore (Qt >= 5.2), ffmpeg and phash. You should be able to find
+existing packages for your system. On Ubuntu install "libphash0-dev", on Arch
+install "phash" from AUR.
 
 ## Build it
     qmake xray.pro
