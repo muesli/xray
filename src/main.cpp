@@ -5,8 +5,8 @@
 
 static QString TMPPATH;                 // name of temporary dir (usually below /tmp)
 static const double THRESHOLD = 0.6;    // find at least x% dupe frames to consider video duped
-static const int FRAMES = 5;            // how many frames to compare
-static const int HAMMINGDIST = 16;      // hamming distance threshold for frame comparison
+static int FRAMES = 5;                  // how many frames to compare
+static int HAMMINGDIST = 16;            // hamming distance threshold for frame comparison
 
 
 QString
@@ -289,22 +289,43 @@ scanDir( QHash<ulong64, QPair<int, QString> >& hashes, const QString& path )
 int
 main(int argc, char *argv[])
 {
-    QCoreApplication app(argc, argv);
+    QCoreApplication app( argc, argv );
+    QCoreApplication::setApplicationName( "xray" );
+    QCoreApplication::setApplicationVersion( "0.0.1" );
 
-    if ( app.arguments().count() < 2 )
+    QCommandLineParser cliParser;
+    cliParser.setApplicationDescription( "xray indexes video files by their perceptual hash and finds duplicates.\n"
+                                         "This means files are not compared byte for byte, but by their visual content.\n"
+                                         "It will/should find dupes of videos, even when they are encoded in different formats and resolutions." );
+    cliParser.addHelpOption();
+    cliParser.addVersionOption();
+    cliParser.addPositionalArgument( "path", QCoreApplication::translate( "main", "Directory to analyze" ) );
+
+    QCommandLineOption framesOption( QStringList() << "f" << "frames",
+                                     QCoreApplication::translate( "main", "Number of <frames> to analyze per video" ),
+                                     "frames", "5" );
+    cliParser.addOption( framesOption );
+
+    QCommandLineOption hammingOption( QStringList() << "d" << "hamming-distance",
+                                      QCoreApplication::translate( "main", "Maximum <distance> between two frames" ),
+                                      "distance", "16" );
+    cliParser.addOption( hammingOption );
+
+    cliParser.process( app );
+
+    const QStringList args = cliParser.positionalArguments();
+    if ( !args.count() )
     {
-        std::cout << "Usage: xray /some/dir/full/of/videos" << std::endl;
-        std::cout << "xray indexes video files by their perceptual hash and finds duplicates." << std::endl
-                  << "This means files are not compared byte for byte, but by their visual content." << std::endl
-                  << "It will/should find dupes of videos, even when they are encoded in different formats and resolutions." << std::endl;
-        return 1;
+        cliParser.showHelp( 1 );
     }
 
-    QHash<ulong64, QPair<int, QString> > hashes;    // perceptual hash, pair<snapshot #, filename>
+    FRAMES = cliParser.value( framesOption ).toInt();
+    HAMMINGDIST = cliParser.value( hammingOption ).toInt();
 
+    QHash<ulong64, QPair<int, QString> > hashes;    // perceptual hash, pair<snapshot #, filename>
     QTemporaryDir tmpDir;
     TMPPATH = tmpDir.path();
-    scanDir( hashes, app.arguments().at( 1 ) );
+    scanDir( hashes, args.first() );
 
     return 0;
 }
