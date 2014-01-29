@@ -9,6 +9,14 @@ static int FRAMES = 5;                  // how many frames to compare
 static int HAMMINGDIST = 16;            // hamming distance threshold for frame comparison
 
 
+void
+ffmpegMissing()
+{
+    std::cout << "Error: ffmpeg could not be found!" << std::endl;
+    std::exit( 1 );
+}
+
+
 QString
 timeToString( int seconds )
 {
@@ -36,7 +44,10 @@ videoMetaData( const QString& file )
 
     QProcess p;
     p.start( "ffprobe", args );
-    p.waitForFinished( 60000 );     // wait one minute at most
+    if ( !p.waitForFinished( 60000 ) )  // wait one minute at most
+    {
+        ffmpegMissing();    // this aborts the app
+    }
 
     QString output = p.readAll();
     QStringList lines = output.split( "\n" );
@@ -87,7 +98,10 @@ createSnaps( const QString& file, const QString& tmpPath )
         QProcess p;
         p.setWorkingDirectory( tmpPath );
         p.start( "ffmpeg", args );
-        p.waitForFinished( 60000 );     // wait one minute at most
+        if ( !p.waitForFinished( 60000 ) )  // wait one minute at most
+        {
+            ffmpegMissing();    // this aborts the app
+        }
     }
 }
 
