@@ -159,7 +159,6 @@ closestHashes( QHash<ulong64, QPair<int, QString> >& hashes, const ulong64& sear
 QHash<QString, int>
 fileMatches( const QString& file, const QHash<ulong64, int>& hash, QHash<ulong64, QPair<int, QString> >& hashes )
 {
-    QPair<int, QString> pair;       // snapshot #, filename
     QHash<QString, int> matches;    // filename, matches
 
     // go through all extracted snapshots and find dupes
@@ -168,26 +167,25 @@ fileMatches( const QString& file, const QHash<ulong64, int>& hash, QHash<ulong64
         ulong64 key = hash.keys().at( j );  // hash
         int value = hash.values().at( j );  // snapshot #
 
+        QPair<int, QString> pair;           // snapshot #, filename
+        QList<QPair<int, QString> > res;    // snapshot #, filename
+
+        // find closest snapshots by hamming distance
+        res = closestHashes( hashes, key );
+        for ( int x = 0; x < res.count(); x++ )
         {
-            QList<QPair<int, QString> > res;    // snapshot #, filename
-
-            // find closest snapshots by hamming distance
-            res = closestHashes( hashes, key );
-            for ( int x = 0; x < res.count(); x++ )
+            pair = res.at( x );
+            if ( pair.second == file )
             {
-                pair = res.at( x );
-                if ( pair.second == file )
-                {
-                    // ignore matches to self
-                    continue;
-                }
-
-                // add/increment match count
-                if ( !matches.contains( pair.second ) )
-                    matches[pair.second] = 1;
-                else
-                    matches[pair.second] = matches[pair.second] + 1;
+                // ignore matches to self
+                continue;
             }
+
+            // add/increment match count
+            if ( !matches.contains( pair.second ) )
+                matches[pair.second] = 1;
+            else
+                matches[pair.second] = matches[pair.second] + 1;
         }
 
         // store hashes for future comparisons
