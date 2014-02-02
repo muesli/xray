@@ -1,7 +1,7 @@
 Version 0.0.2:
     * Shows all duplicate files matching, not just the first one.
     * Added command line options for hamming distance and frame count.
-    * Abort when ffmpeg can not be launched.
+    * Switch to ffmpeg for snapshots and abort when it can not be launched.
     * Added more file extensions to whitelist.
 
 Version 0.0.1:
