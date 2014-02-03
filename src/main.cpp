@@ -95,12 +95,13 @@ videoMetaData( const QString& file )
 
 // create snapshots from video file
 void
-createSnaps( const QString& file, const QString& tmpPath )
+createSnaps( const QString& file, const QString& path )
 {
     // get meta data
     QVariantMap metadata = videoMetaData( file );
     std::cout << "   --> Duration: " << metadata[ "duration" ].toInt() << " - bitrate: " << metadata[ "bitrate" ].toInt() << std::endl;
 
+    // start 10% into the video
     int start = metadata[ "duration" ].toInt() / 10;
     int step = metadata[ "duration" ].toInt() / ( FRAMES * 1.5 );
 
@@ -118,7 +119,7 @@ createSnaps( const QString& file, const QString& tmpPath )
              << QString( "%1.jpg" ).arg( i );
 
         QProcess p;
-        p.setWorkingDirectory( tmpPath );
+        p.setWorkingDirectory( path );
         p.start( "ffmpeg", args );
         if ( !p.waitForFinished( 60000 ) )  // wait one minute at most
         {
