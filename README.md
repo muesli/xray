@@ -20,7 +20,7 @@ of both videos to safely identify exact copies of a file.
 ## Dependencies
 xray depends on QtCore (Qt >= 5.2), ffmpeg and phash. You should be able to find
 existing packages for your system. On Ubuntu install "libphash0-dev", on Arch
-install "phash" from AUR.
+install "phash" from AUR, on OS X "brew install phash".
 
 ## Build it
     qmake xray.pro
