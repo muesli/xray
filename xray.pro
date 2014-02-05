@@ -4,7 +4,7 @@ QT += network xml
 LIBS += -lpHash
 
 #HEADERS =
-SOURCES = src/main.cpp
+SOURCES = src/xray.cpp
 
 isEmpty(PREFIX) {
   PREFIX=/usr/local
