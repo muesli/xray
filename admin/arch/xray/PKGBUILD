@@ -1,8 +1,8 @@
 # Maintainer: Christian Muehlhaeuser <muesli@gmail.com>
 
 pkgname=xray
-pkgver=0.0.1
-pkgrel=2
+pkgver=0.0.2
+pkgrel=1
 pkgdesc="xray compares media files by their perceptual hash and identifies dupes"
 arch=('i686' 'x86_64')
 url="https://github.com/muesli/xray"
